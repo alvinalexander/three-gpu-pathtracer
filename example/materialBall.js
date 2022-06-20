@@ -2,14 +2,14 @@ import * as THREE from 'three';
 import { FullScreenQuad } from 'three/examples/jsm/postprocessing/Pass.js';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { PathTracingRenderer, PhysicalPathTracingMaterial, PhysicalCamera, BlurredEnvMapGenerator } from '../src/index.js';
+import { PathTracingRenderer, PhysicalPathTracingMaterial, PhysicalCamera, BlurredEnvMapGenerator, EquirectCamera } from '../src/index.js';
 import { PathTracingSceneWorker } from '../src/workers/PathTracingSceneWorker.js';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { GUI } from 'three/examples/jsm/libs/lil-gui.module.min.js';
 
 let renderer, controls, sceneInfo, ptRenderer, activeCamera, fsQuad, materials;
-let perspectiveCamera, orthoCamera;
+let perspectiveCamera, orthoCamera, equirectCamera;
 let envMap, envMapGenerator, scene;
 let samplesEl;
 
@@ -51,10 +51,10 @@ const params = {
 
 	multipleImportanceSampling: true,
 	stableNoise: false,
-	environmentIntensity: 3,
+	environmentIntensity: 1,
 	environmentRotation: 0,
 	environmentBlur: 0.0,
-	backgroundBlur: 0.05,
+	backgroundBlur: 0.0,
 	bounces: 5,
 	samplesPerFrame: 1,
 	acesToneMapping: true,
@@ -95,6 +95,7 @@ async function init() {
 
 	renderer = new THREE.WebGLRenderer( { antialias: true } );
 	renderer.toneMapping = THREE.ACESFilmicToneMapping;
+	renderer.outputEncoding = THREE.sRGBEncoding;
 	renderer.setClearColor( 0, 0 );
 	document.body.appendChild( renderer.domElement );
 
@@ -105,6 +106,9 @@ async function init() {
 	const orthoHeight = orthoWidth / aspect;
 	orthoCamera = new THREE.OrthographicCamera( orthoWidth / - 2, orthoWidth / 2, orthoHeight / 2, orthoHeight / - 2, 0, 100 );
 	orthoCamera.position.set( - 4, 2, 3 );
+
+	equirectCamera = new EquirectCamera();
+	equirectCamera.position.set( - 4, 2, 3 );
 
 	ptRenderer = new PathTracingRenderer( renderer );
 	ptRenderer.alpha = true;
@@ -326,7 +330,7 @@ async function init() {
 	} );
 
 	const cameraFolder = gui.addFolder( 'Camera' );
-	cameraFolder.add( params, 'cameraProjection', [ 'Perspective', 'Orthographic' ] ).onChange( v => {
+	cameraFolder.add( params, 'cameraProjection', [ 'Perspective', 'Orthographic', 'Equirectangular' ] ).onChange( v => {
 
 		updateCamera( v );
 
@@ -430,7 +434,7 @@ function updateEnvBlur() {
 
 function updateCamera( cameraProjection ) {
 
-	if ( cameraProjection === "Perspective" ) {
+	if ( cameraProjection === 'Perspective' ) {
 
 		if ( activeCamera ) {
 
@@ -440,7 +444,7 @@ function updateCamera( cameraProjection ) {
 
 		activeCamera = perspectiveCamera;
 
-	} else {
+	} else if ( cameraProjection === 'Orthographic' ) {
 
 		if ( activeCamera ) {
 
@@ -449,6 +453,16 @@ function updateCamera( cameraProjection ) {
 		}
 
 		activeCamera = orthoCamera;
+
+	} else { // Equirect
+
+		if ( activeCamera ) {
+
+			equirectCamera.position.copy( activeCamera.position );
+
+		}
+
+		activeCamera = equirectCamera;
 
 	}
 
