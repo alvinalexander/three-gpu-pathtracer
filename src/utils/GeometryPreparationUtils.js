@@ -65,7 +65,7 @@ export function trimToAttributes( geometry, attributes ) {
 export function setCommonAttributes( geometry, options ) {
 
 	const { attributes = [], normalMapRequired = false } = options;
-
+	// if the geometry has no normal attribute but the attributes list includes normal, then set normal
 	if ( ! geometry.attributes.normal && ( attributes && attributes.includes( 'normal' ) ) ) {
 
 		geometry.computeVertexNormals();
@@ -98,6 +98,13 @@ export function setCommonAttributes( geometry, options ) {
 			geometry.setAttribute( 'tangent', new BufferAttribute( new Float32Array( vertCount * 4 ), 4, false ) );
 
 		}
+
+	}
+
+	if ( ! geometry.attributes.color && ( attributes && attributes.includes( 'color' ) ) ) {
+
+		const vertCount = geometry.attributes.position.count;
+		geometry.setAttribute( 'color', new BufferAttribute( new Uint16Array( vertCount * 4 ), 4, true ) );
 
 	}
 
