@@ -37,7 +37,7 @@ export class PathTracingSceneGenerator {
 
 		return {
 			...mergeMeshes( meshes, {
-				attributes: [ 'position', 'normal', 'tangent', 'uv' ],
+				attributes: [ 'position', 'normal', 'tangent', 'uv', 'color' ],
 			} ),
 			lights
 		};
