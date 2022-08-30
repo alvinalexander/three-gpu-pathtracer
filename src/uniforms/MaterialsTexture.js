@@ -1,6 +1,6 @@
 import { DataTexture, RGBAFormat, ClampToEdgeWrapping, FloatType, FrontSide, BackSide, DoubleSide } from 'three';
 
-const MATERIAL_PIXELS = 19;
+const MATERIAL_PIXELS = 20;
 const MATERIAL_STRIDE = MATERIAL_PIXELS * 4;
 
 export class MaterialsTexture extends DataTexture {
@@ -162,6 +162,8 @@ export class MaterialsTexture extends DataTexture {
 
 			const m = materials[ i ];
 
+			// console.log( 'Vertex colors', m.vertexColors );
+
 			// color
 			floatArray[ index ++ ] = m.color.r;
 			floatArray[ index ++ ] = m.color.g;
@@ -241,6 +243,11 @@ export class MaterialsTexture extends DataTexture {
 
 			// normalMap transform
 			index += writeTextureMatrixToArray( m, 'normalMap', floatArray, index );
+
+			floatArray[ index ++ ] = + m.vertexColors;
+			index ++;
+			index ++;
+			index ++;
 
 		}
 

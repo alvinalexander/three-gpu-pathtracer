@@ -188,6 +188,7 @@ export class PhysicalPathTracingMaterial extends MaterialBase {
 							// TODO: should we account for emissive surfaces here?
 
 							vec2 uv = textureSampleBarycoord( uvAttribute, barycoord, faceIndices.xyz ).xy;
+							vec4 vertexColor = textureSampleBarycoord( colorAttribute, barycoord, faceIndices.xyz);
 							uint materialIndex = uTexelFetch1D( materialIndexAttribute, faceIndices.x ).r;
 							Material material = readMaterialInfo( materials, materialIndex );
 
@@ -213,6 +214,11 @@ export class PhysicalPathTracingMaterial extends MaterialBase {
 								vec3 uvPrime = material.mapTransform * vec3( uv, 1 );
 								albedo *= texture2D( textures, vec3( uvPrime.xy, material.map ) );
 
+							}
+
+							if( material.vertexColors ){
+
+								albedo *= vertexColor;
 							}
 
 							// alphaMap
@@ -505,12 +511,18 @@ export class PhysicalPathTracingMaterial extends MaterialBase {
 						}
 
 						vec2 uv = textureSampleBarycoord( uvAttribute, barycoord, faceIndices.xyz ).xy;
+						vec4 vertexColor = textureSampleBarycoord( colorAttribute, barycoord, faceIndices.xyz);
 						// albedo
 						vec4 albedo = vec4( material.color, material.opacity );
 						if ( material.map != - 1 ) {
 
 							vec3 uvPrime = material.mapTransform * vec3( uv, 1 );
 							albedo *= texture2D( textures, vec3( uvPrime.xy, material.map ) );
+
+						}
+
+						if( material.vertexColors ){
+							albedo *= vertexColor;
 						}
 
 						// alphaMap

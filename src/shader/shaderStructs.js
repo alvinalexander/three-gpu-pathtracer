@@ -57,6 +57,8 @@ export const shaderMaterialStructs = /* glsl */ `
 		mat3 emissiveMapTransform;
 		mat3 normalMapTransform;
 
+		bool vertexColors;
+
 	};
 
 	mat3 readTextureTransform( sampler2D tex, uint index ) {
@@ -76,7 +78,7 @@ export const shaderMaterialStructs = /* glsl */ `
 
 	Material readMaterialInfo( sampler2D tex, uint index ) {
 
-		uint i = index * 19u;
+		uint i = index * 20u;
 
 		vec4 s0 = texelFetch1D( tex, i + 0u );
 		vec4 s1 = texelFetch1D( tex, i + 1u );
@@ -85,6 +87,7 @@ export const shaderMaterialStructs = /* glsl */ `
 		vec4 s4 = texelFetch1D( tex, i + 4u );
 		vec4 s5 = texelFetch1D( tex, i + 5u );
 		vec4 s6 = texelFetch1D( tex, i + 6u );
+		vec4 s7 = texelFetch1D( tex, i + 19u );
 
 		Material m;
 		m.color = s0.rgb;
@@ -123,6 +126,8 @@ export const shaderMaterialStructs = /* glsl */ `
 		m.transmissionMapTransform = m.transmissionMap == - 1 ? mat3( 0 ) : readTextureTransform( tex, firstTextureTransformIdx + 6u );
 		m.emissiveMapTransform = m.emissiveMap == - 1 ? mat3( 0 ) : readTextureTransform( tex, firstTextureTransformIdx + 8u );
 		m.normalMapTransform = m.normalMap == - 1 ? mat3( 0 ) : readTextureTransform( tex, firstTextureTransformIdx + 10u );
+
+		m.vertexColors = bool( s7.r );
 
 		return m;
 
